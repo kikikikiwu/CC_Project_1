@@ -1,75 +1,45 @@
-//array of ellipse locations
-  int[] countNum = new int [100]; 
-  float[] xpos = new float [100];
-  float[] ypos = new float [100];
-  int index;
-  
-//ellipse data
-  float x = 10;
-  float y = 10;
-  float r = 10;
-  
+/*
+Current Idea: automately draw an automated maze pattern
+Directions: random among left, right and down with no inteception
+*/
+
+//create array for target directions
+PVector [] targets = new PVector [20];
+//create array for starting points
+PVector [] origins = new PVector [20];
+float ox, oy;
 
 void setup(){
-  size(800,800);
-  //leave moving trace
+  size (400,400);
   background(255);
-  
-  //initialize the array
-  for(int i=0; i<countNum.length; i++){
-    countNum[i]=i;
-    index=countNum[i];
-  }
-  for (int i=0; i<countNum.length; i++){
-    xpos[i]=0;
-    ypos[i]=0;
+
+//initialize arrays
+    for (int i = 0; i < origins.length; i++){
+    targets[i] = new PVector();
+    origins[i]= new PVector();;
   }
 }
 
 void draw(){
-  //new location values of each array slot shift down
-   for (int i=0; i<countNum.length; i++){
-     xpos[i] = xpos[i+1];
-     ypos[i] = ypos[i+1];
-   }
-   
- //update new value in the last array slot for passing down
-  float newX;
-  float newY;
-  float stepSize = random (1,5);
-  float currentX = newX;
-  float currentY = newY;
-  
-  newY = ypos[countNum.length - 1];
-   
-  //new location directions are decided randomly
-  //create cases for the 4 direction options
-  String[] directions = {"east", "south", "west", "north"};
-  String r_direction = directions[(int)random(1,4)];
-  
-    switch(r_direction){
-      case "east":
-        newX = currentX + stepSize;
-        xpos[countNum.length - 1] = newX;
-      break;
-      case "south":
-      
-      break;
-      case "west":
-      break;
-      case "north":
-        ypos[countNum.length -1] = newY;
-      break;
-    }
-    
-    fill(255-index*5);
-    stroke(1);
-    ellipse(x, y,r,r);
-
+//store data into array
+  for (int i = 0; i < origins.length; i++){
+  origins[i] = new PVector (i*(width/origins.length), 0);
+  move(origins[i], targets[i]);  
+//pass the original location data from "move" to "drawLine"
+  drawLine(origins[i]);
+  }
 }
 
-//the ellispe trace will fade out at its "tails"
-//and change color when it intersects with others
-//ellispe will not move backward
-//(newX,newY) doesn't intersect with the (previous X, previousY)
-//mouse press will change the directions as well
+void move(PVector origins_, PVector targets_){
+//acceleration
+  PVector acc = new PVector (random(-3,3),1);
+//update original locations for every move
+  origins_.add(targets_);
+  targets_.add(acc);
+}
+
+void drawLine(PVector origins_){
+  fill(0,0,255);
+  noStroke();
+  ellipse(origins_.x, origins_.y, 5,5);
+}
