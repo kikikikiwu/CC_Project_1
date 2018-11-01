@@ -6,87 +6,79 @@ Directions: random among left, right and up with no inteceptions
 //=================CODE============================
 
 //create dots that constitute the moving lines
-Dot [] dots = new Dot [20];
-//record the life in frames of each line's movement
-int [] frameCounter = new int [20];
+ArrayList<Dotline> dots = new ArrayList<Dotline> ();
 
+//create an array to store dots for fading effect
+int fade = 0;
+int i_;
+Human [] history = new Human [20];
+float [] xloc = new float [20];
+float [] yloc = new float [20];
+float [] ts = new float [20];
+float [] birthFrame = new float [50];
+
+Dotline dt;
+Human human;
 
 void setup(){
   size (400,400);
   background(255);
 
-//initialize arrays
-  for (int i = 0; i < dots.length; i++){
-    dots[i] = new Dot (random(0, width), random(0, height)); //create the dots instance and passing para.
+//initialize arrays, create initial locations
+  for (int i = 0; i < 20; i++){
+    dots.add(new Dotline(random(width), random(height), i));
+  }
+  for (int i = 0; i < history.length; i++){
+    history [i] = new Human (xloc[i], yloc[i], ts[i], i);
   }
 }
 
 void draw(){
-  for (int i = 0; i < dots.length; i++){ 
-    dots[i].drawLine();
-    dots[i].display();
+  for (int i = 0; i < dots.size(); i++){
+    dt = dots.get(i); // get dt[i]
+    dt.drawLine();
+    dt.display();
     
-    //check if dots die
-    if (dots[i].totalLife == 0){
-    dots[i] = new Dot (random(0, width), random(0, height));
+    //check if dots die, new starting locations
+    if (dt.totalLife == 0){
+      dt.velocity = new PVector (0,0);
+      dots.add(new Dotline(random(width), random(height), dots.size()));
+      dots.remove(0);      
+     //println("die");
     }
+  }
+
+     //the total line number will be limited under 200
+    if (dots.size() > 200){
+      dots.remove(0);
+    }
+    
+  for (int i = 0; i < history.length; i++){ 
+    float resetZero = frameCount-birthFrame[fade];
+    human = new Human(xloc[i], yloc[i], ts[i], resetZero);
+    human.exist();
   }
 }
 
-class Dot{
-  PVector origin; //intial location of each instance
-  int life; //life of each turn
-  int totalLife;
-  PVector velocity = new PVector (0, 0);
-  int previousDir;
+void mousePressed(){
+  i_ = i_ % xloc.length; //pass i_ to i above
   
-  Dot(float xloc, float yloc){ //constructor
-    origin = new PVector (xloc, yloc);
-    life = 0;
-    totalLife = (int)random(50,200);
-  }
-
-    void drawLine(){ //update location
-     int turn = 1;
-     
-     if (life == 0){  //change directions
-        int direction = (int)random(0, 4); 
-        
-      //check direction
-      if (abs(direction - previousDir) == 2){ //opposite direction = move backward
-          direction = (direction + 1) % 4; //change direction while keep the index between 0 to 4
-         }
-        
-       if (direction == 0){ //direction: right
-         velocity = new PVector (turn, 0);
-          
-       }else if (direction == 1){ //direction: up
-         velocity = new PVector (0, -turn);
-          
-       }else if (direction == 2){ //direction: left
-         velocity = new PVector (-turn, 0);
-          
-       }else if (direction == 3){ //direction: down
-         velocity = new PVector (0, turn);
-       }
-        
-        previousDir = direction; //store the current direction as previous direction
-        
-   //life of each line
-     life = (int)random(1,20);
-      }
-    
-    //move the dots
-     origin.add(velocity);
-      
-   //life reduces 1 frame per dot is drawn
-     life -= 1;
-     totalLife -= 1;
-     }
-    
-    void display(){
-      fill(0,0,255,10);
-      noStroke();
-      ellipse(origin.x, origin.y, 3, 3);     
-    }
+  //click mouse to pass location data
+  xloc[i_] = mouseX;
+  yloc[i_] = mouseY;
+  
+  //associate fade rate with the frame, and reset birthframe when mouse clicked
+  fade = fade % birthFrame.length; //less one per click
+  birthFrame[fade] = frameCount;  //store the current frame for reset
+  
+  ts[i_] = (birthFrame[fade] % 10) +1; //size, avoid 0
+  
+  dots.add(new Dotline(mouseX, mouseY, dots.size()));
+    //dots.remove(0);
+}
+   
+void keyPressed(){ //eraser   
+  size (400,400);
+  background(255);
+  ts[i_] = 0; //make the remain one transparent
 }
