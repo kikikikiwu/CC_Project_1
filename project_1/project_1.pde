@@ -48,8 +48,8 @@ void draw(){
     }
   }
 
-     //the total line number will be limited under 200
-    if (dots.size() > 200){
+     //the index number will be limited under 50
+    if (dots.size() > 50){
       dots.remove(0);
     }
     
